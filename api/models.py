@@ -5,7 +5,7 @@ from django.utils.text import slugify
 
 
 class User(AbstractUser):
-    avatar = models.ImageField(null=True, upload_to='static/uploads')
+    avatar = models.ImageField(null=True, blank=True, upload_to='static/uploads')
     role = models.IntegerField(choices=((0, 'ADMIN'), (1, 'USER')), default=1)
     ball = models.IntegerField(default=0)
     REQUIRED_FIELDS = ['email', 'first_name', 'last_name']

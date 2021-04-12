@@ -15,7 +15,7 @@ class UserSerializer(serializers.HyperlinkedModelSerializer):
 
 
 class UserRegistrationSerializer(serializers.ModelSerializer):
-    avatar = serializers.CharField()
+    avatar = Base64ImageField()
     email = serializers.EmailField(max_length=50)
     password = serializers.CharField(write_only=True)
     confirm_password = serializers.CharField(write_only=True)
