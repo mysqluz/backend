@@ -8,7 +8,6 @@ class UserPermission(permissions.BasePermission):
         return False
 
     def has_object_permission(self, request, view, obj):
-        # Deny actions on objects if the user is not authenticated
         if view.action == 'retrieve':
             return True
         if not request.user.is_authenticated:
@@ -27,7 +26,6 @@ class UserUpdatePermission(permissions.BasePermission):
         return False
 
     def has_object_permission(self, request, view, obj):
-        # Deny actions on objects if the user is not authenticated
         if not request.user.is_authenticated:
             return False
         return obj == request.user or request.user.is_admin
@@ -40,3 +38,17 @@ class CategoryProblemNewsPermission(permissions.BasePermission):
         elif view.action in ['create', 'update', 'partial_update', 'destroy']:
             return request.user.is_authenticated and request.user.is_admin
         return True
+
+
+class TaskPermission(permissions.BasePermission):
+    def has_permission(self, request, view):
+        if view.action in ['list', 'retrieve']:
+            return True
+        if view.action == 'create':
+            return request.user.is_authenticated
+        return False
+
+    def has_object_permission(self, request, view, obj):
+        if view.action == 'retrieve':
+            return True
+        return False

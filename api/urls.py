@@ -13,28 +13,32 @@ Including another URLconf
     1. Import the include() function: from django.urls import include, path
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
-from django.contrib import admin
 from django.urls import path, include
 from rest_framework import routers
 
 from api.views import (
-    UserViewSet,
-    UserRegistrationAPIView,
-    UserLoginAPIView,
-    UserTokenAPIView,
-    CategoryViewSet, UserUpdateAPIView, ProblemViewSet, NewsViewSet,
+    UserViewSet, UserRegistrationAPIView,
+    UserLoginAPIView, UserTokenAPIView,
+    CategoryViewSet, UserUpdateAPIView,
+    ProblemViewSet, NewsViewSet,
+    CategoryProblemsViewSet, TaskViewSet,
+    UserTasksViewSet, ProblemTasksViewSet,
 )
 
 router = routers.DefaultRouter()
 router.register(r'users', UserViewSet)
 router.register(r'categories', CategoryViewSet)
 router.register(r'problems', ProblemViewSet)
+router.register(r'tasks', TaskViewSet)
 router.register(r'news', NewsViewSet)
 
 urlpatterns = [
     path('', include(router.urls)),
     path('users/<pk>', UserUpdateAPIView.as_view(), name='update'),
+    path('users/<pk>/tasks', UserTasksViewSet.as_view({'get': 'retrieve'}), name='user_tasks'),
     path('auth/register/', UserRegistrationAPIView.as_view(), name="register"),
     path('auth/login/', UserLoginAPIView.as_view(), name="login"),
     path('tokens/<key>/', UserTokenAPIView.as_view(), name="token"),
+    path('categories/<slug>/problems', CategoryProblemsViewSet.as_view({'get': 'retrieve'}), name="category_problems"),
+    path('problems/<pk>/tasks', ProblemTasksViewSet.as_view({'get': 'retrieve'}), name="problem_tasks"),
 ]

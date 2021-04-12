@@ -1,9 +1,7 @@
+from autoslug import AutoSlugField
 from django.contrib.auth.models import AbstractUser
 from django.db import models
 from django.utils.text import slugify
-from autoslug import AutoSlugField
-
-from api.managers import CustomUserManager
 
 
 class User(AbstractUser):
@@ -11,8 +9,6 @@ class User(AbstractUser):
     role = models.IntegerField(choices=((0, 'ADMIN'), (1, 'USER')), default=1)
     ball = models.IntegerField(default=0)
     REQUIRED_FIELDS = ['email', 'first_name', 'last_name']
-
-    # objects = CustomUserManager()
 
     def __str__(self):
         return self.username
@@ -33,7 +29,7 @@ class Category(models.Model):
 
 
 class Problem(models.Model):
-    category = models.ForeignKey(Category, on_delete=models.CASCADE)
+    category = models.ForeignKey(Category, on_delete=models.CASCADE, related_name='problems')
     title = models.CharField(max_length=255)
     content = models.TextField()
     dump_file_src = models.CharField(max_length=255)
@@ -43,8 +39,8 @@ class Problem(models.Model):
 
 
 class Task(models.Model):
-    problem = models.ForeignKey(Problem, on_delete=models.DO_NOTHING)
-    user = models.ForeignKey(User, on_delete=models.DO_NOTHING)
+    problem = models.ForeignKey(Problem, on_delete=models.DO_NOTHING, related_name='tasks')
+    user = models.ForeignKey(User, on_delete=models.DO_NOTHING, related_name='tasks')
     status = models.IntegerField(choices=((0, 'IN QUEUE'),), default=0)
     source = models.TextField()
 

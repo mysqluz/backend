@@ -1,19 +1,19 @@
-from rest_framework import status, viewsets, permissions
+from rest_framework import status, viewsets
 from rest_framework.authtoken.models import Token
 from rest_framework.generics import CreateAPIView, GenericAPIView, UpdateAPIView
 from rest_framework.generics import RetrieveDestroyAPIView
 from rest_framework.response import Response
 
-from api.models import Category, User, Problem, News
-from api.permissions import UserPermission, UserUpdatePermission, CategoryProblemNewsPermission
+from api.models import Category, User, Problem, News, Task
+from api.permissions import UserPermission, UserUpdatePermission, CategoryProblemNewsPermission, TaskPermission
 from api.serializers import (
-    UserRegistrationSerializer,
-    UserLoginSerializer,
-    TokenSerializer,
-    CategorySerializer,
-    UserSerializer,
-    UserUpdateSerializer,
-    ProblemSerializer, NewsSerializer
+    UserRegistrationSerializer, UserLoginSerializer,
+    TokenSerializer, CategorySerializer,
+    UserSerializer, UserUpdateSerializer,
+    ProblemSerializer, NewsSerializer,
+    CategoryProblemsSerializer, TaskSerializer,
+    UserTasksSerializer, ProblemTasksSerializer,
+    TaskCreateSerializer
 )
 
 
@@ -111,6 +111,59 @@ class ProblemViewSet(viewsets.ModelViewSet):
     """Problems"""
     queryset = Problem.objects.all()
     serializer_class = ProblemSerializer
+    permission_classes = (CategoryProblemNewsPermission,)
+
+    http_method_names = ['get']
+
+
+class CategoryProblemsViewSet(viewsets.ModelViewSet):
+    """CategoryProblems"""
+    lookup_field = 'slug'
+    queryset = Category.objects.all()
+    serializer_class = CategoryProblemsSerializer
+    permission_classes = (CategoryProblemNewsPermission,)
+
+    http_method_names = ['get']
+
+
+class TaskViewSet(viewsets.ModelViewSet):
+    """Tasks"""
+    queryset = Task.objects.all()
+    permission_classes = (TaskPermission,)
+
+    http_method_names = ['get', 'post']
+
+    def get_serializer_class(self):
+        if self.action in ['list', 'retrieve']:
+            return TaskSerializer
+        return TaskCreateSerializer
+
+    def perform_create(self, serializer):
+        serializer.save(user=self.request.user)
+
+
+class TaskCreateViewSet(viewsets.ModelViewSet):
+    """TaskCreate"""
+    queryset = Task.objects.all()
+    serializer_class = TaskCreateSerializer
+    permission_classes = (TaskPermission,)
+
+    http_method_names = ['post']
+
+
+class UserTasksViewSet(viewsets.ModelViewSet):
+    """UserTasks"""
+    queryset = User.objects.all()
+    serializer_class = UserTasksSerializer
+    permission_classes = (CategoryProblemNewsPermission,)
+
+    http_method_names = ['get']
+
+
+class ProblemTasksViewSet(viewsets.ModelViewSet):
+    """ProblemTasks"""
+    queryset = Problem.objects.all()
+    serializer_class = ProblemTasksSerializer
     permission_classes = (CategoryProblemNewsPermission,)
 
     http_method_names = ['get']

@@ -1,11 +1,11 @@
 from django.contrib.auth import authenticate
 from django.contrib.auth.hashers import make_password
-from drf_extra_fields.fields import Base64ImageField
-from rest_framework import serializers, viewsets
 from django.utils.translation import ugettext_lazy as _
+from drf_extra_fields.fields import Base64ImageField
+from rest_framework import serializers
 from rest_framework.authtoken.models import Token
 
-from api.models import User, Category, Problem, News
+from api.models import User, Category, Problem, News, Task
 
 
 class UserSerializer(serializers.HyperlinkedModelSerializer):
@@ -96,6 +96,70 @@ class CategorySerializer(serializers.ModelSerializer):
 class ProblemSerializer(serializers.ModelSerializer):
     category = CategorySerializer()
     author = UserSerializer()
+
+    class Meta:
+        model = Problem
+        exclude = ('dump_file_src', 'permissions')
+
+
+class ProblemWithoutCategorySerializer(serializers.ModelSerializer):
+    author = UserSerializer()
+
+    class Meta:
+        model = Problem
+        exclude = ('dump_file_src', 'permissions')
+
+
+class CategoryProblemsSerializer(serializers.ModelSerializer):
+    problems = ProblemWithoutCategorySerializer(many=True)
+
+    class Meta:
+        model = Category
+        fields = '__all__'
+
+
+class TaskSerializer(serializers.ModelSerializer):
+    problem = ProblemWithoutCategorySerializer()
+    user = UserSerializer()
+
+    class Meta:
+        model = Task
+        exclude = ('source',)
+
+
+class TaskCreateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Task
+        exclude = ('status', 'user')
+
+
+class TaskWithoutUserSerializer(serializers.ModelSerializer):
+    problem = ProblemWithoutCategorySerializer()
+
+    class Meta:
+        model = Task
+        exclude = ('source',)
+
+
+class TaskWithoutProblemSerializer(serializers.ModelSerializer):
+    user = UserSerializer()
+
+    class Meta:
+        model = Task
+        exclude = ('source',)
+
+
+class UserTasksSerializer(serializers.ModelSerializer):
+    tasks = TaskWithoutUserSerializer(many=True)
+
+    class Meta:
+        model = User
+        fields = ['url', 'username', 'first_name', 'last_name', 'avatar', 'ball', 'tasks']
+
+
+class ProblemTasksSerializer(serializers.ModelSerializer):
+    tasks = TaskWithoutProblemSerializer(many=True)
+
     class Meta:
         model = Problem
         exclude = ('dump_file_src', 'permissions')
