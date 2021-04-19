@@ -135,7 +135,7 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/3.1/howto/static-files/
 
 STATIC_URL = '/static/'
-
+DUMPS_DIR = BASE_DIR / 'static/dumps'
 
 try:
     with open(Path.joinpath(Path(__file__).resolve().parent, 'local_settings.py')) as f:
