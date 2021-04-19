@@ -39,6 +39,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'rest_framework',
     'rest_framework.authtoken',
+    'corsheaders',
     'drf_yasg',
     'api'
 ]
@@ -46,6 +47,7 @@ INSTALLED_APPS = [
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
@@ -136,6 +138,14 @@ USE_TZ = True
 
 STATIC_URL = '/static/'
 DUMPS_DIR = BASE_DIR / 'static/dumps'
+
+CORS_ALLOWED_ORIGINS = [
+    "https://mysql.uz",
+    "http://localhost:8080",
+    "http://localhost:9000",
+    "http://127.0.0.1:8080",
+    "http://127.0.0.1:9000"
+]
 
 try:
     with open(Path.joinpath(Path(__file__).resolve().parent, 'local_settings.py')) as f:
