@@ -4,7 +4,7 @@ from rest_framework.generics import CreateAPIView, GenericAPIView, UpdateAPIView
 from rest_framework.generics import RetrieveDestroyAPIView
 from rest_framework.response import Response
 
-from api.models import Category, User, Problem, News, Task
+from api.models import Category, User, Problem, News, Task, Constants
 from api.permissions import UserPermission, UserUpdatePermission, CategoryProblemNewsPermission, TaskPermission
 from api.serializers import (
     UserRegistrationSerializer, UserLoginSerializer,
@@ -139,7 +139,7 @@ class TaskViewSet(viewsets.ModelViewSet):
         return TaskCreateSerializer
 
     def perform_create(self, serializer):
-        serializer.save(user=self.request.user)
+        serializer.save(user=self.request.user, status=Constants.TASK_IN_QUEUE)
 
 
 class TaskCreateViewSet(viewsets.ModelViewSet):

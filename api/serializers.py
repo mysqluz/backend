@@ -99,7 +99,7 @@ class ProblemSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Problem
-        exclude = ('dump_file', 'permissions')
+        exclude = ('dump', 'permissions', 'answer', 'execute_table')
 
 
 class ProblemWithoutCategorySerializer(serializers.ModelSerializer):
@@ -107,7 +107,7 @@ class ProblemWithoutCategorySerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Problem
-        exclude = ('dump_file', 'permissions')
+        exclude = ('dump', 'permissions', 'answer', 'execute_table')
 
 
 class CategoryProblemsSerializer(serializers.ModelSerializer):
@@ -130,7 +130,7 @@ class TaskSerializer(serializers.ModelSerializer):
 class TaskCreateSerializer(serializers.ModelSerializer):
     class Meta:
         model = Task
-        exclude = ('status', 'user')
+        exclude = ('user',)
 
 
 class TaskWithoutUserSerializer(serializers.ModelSerializer):
@@ -162,7 +162,7 @@ class ProblemTasksSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Problem
-        exclude = ('dump_file', 'permissions')
+        exclude = ('dump', 'permissions', 'answer', 'execute_table')
 
 
 class NewsSerializer(serializers.ModelSerializer):
