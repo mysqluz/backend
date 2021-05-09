@@ -1,13 +1,14 @@
 from time import time
 
 from autoslug import AutoSlugField
+from ckeditor_uploader.fields import RichTextUploadingField
 from django.contrib.auth.models import AbstractUser
 from django.core.exceptions import ValidationError
 from django.db import models
 from django.dispatch import receiver
 from django.utils.text import slugify
 
-from checker import tester
+from checker import tester, logger
 
 
 def problem_dump_directory(problem, filename):
@@ -23,12 +24,22 @@ class Constants:
     TASK_ACCEPTED = 1
     TASK_WRONG_ANSWER = 2
 
+    task = {
+        TASK_IN_QUEUE: 'IN QUEUE',
+        TASK_RUNNING: 'RUNNING',
+        TASK_JUDGEMENT_FAILED: 'JUDGEMENT FAILED',
+        TASK_ACCEPTED: 'ACCEPTED',
+        TASK_WRONG_ANSWER: 'WRONG ANSWER',
+    }
+
 
 class User(AbstractUser):
-    avatar = models.ImageField(null=True, blank=True, upload_to='static/uploads')
-    role = models.IntegerField(choices=((0, 'ADMIN'), (1, 'USER')), default=1)
+    avatar = models.ImageField(null=True, blank=True, upload_to='media/uploads/avatar')
     ball = models.IntegerField(default=0)
     REQUIRED_FIELDS = ['email', 'first_name', 'last_name']
+
+    class Meta:
+        ordering = ('-ball',)
 
     def __str__(self):
         return self.username
@@ -47,7 +58,6 @@ class Category(models.Model):
 
     def save(self, *args, **kwargs):
         self.slug = slugify(self.name)
-        print(self.slug)
         super(Category, self).save(*args, **kwargs)
 
     def __str__(self):
@@ -57,7 +67,7 @@ class Category(models.Model):
 class Problem(models.Model):
     category = models.ForeignKey(Category, on_delete=models.CASCADE, related_name='problems')
     title = models.CharField(max_length=255)
-    content = models.TextField()
+    content = RichTextUploadingField()
     dump = models.TextField()
     answer = models.TextField()
     permissions = models.IntegerField(choices=(
@@ -79,13 +89,8 @@ class Problem(models.Model):
 class Task(models.Model):
     problem = models.ForeignKey(Problem, on_delete=models.DO_NOTHING, related_name='tasks')
     user = models.ForeignKey(User, on_delete=models.DO_NOTHING, related_name='tasks')
-    status = models.IntegerField(choices=(
-        (Constants.TASK_IN_QUEUE, 'IN QUEUE'),
-        (Constants.TASK_RUNNING, 'RUNNING'),
-        (Constants.TASK_JUDGEMENT_FAILED, 'JUDGEMENT FAILED'),
-        (Constants.TASK_ACCEPTED, 'ACCEPTED'),
-        (Constants.TASK_WRONG_ANSWER, 'WRONG ANSWER'),
-    ), default=Constants.TASK_IN_QUEUE)
+    status = models.IntegerField(choices=(zip(Constants.task.keys(), Constants.task.values())),
+                                 default=Constants.TASK_IN_QUEUE)
     source = models.TextField()
 
     def __str__(self):
@@ -94,8 +99,9 @@ class Task(models.Model):
 
 class News(models.Model):
     title = models.CharField(max_length=255)
+    image = models.ImageField()
     slug = AutoSlugField(populate_from='title', unique=True)
-    content = models.TextField()
+    content = RichTextUploadingField()
     views = models.IntegerField(default=0)
 
     class Meta:
@@ -119,6 +125,11 @@ def execute_after_save(sender, instance: Task, created, *args, **kwargs):
                 instance.status = Constants.TASK_WRONG_ANSWER
         except Exception as e:
             instance.status = Constants.TASK_JUDGEMENT_FAILED
-            print('CHECK FAILED', e)
+            logger.debug('CHECK FAILED %s', e)
         instance.save()
-        print('Checked in', time() - t1)
+        if instance.status == Constants.TASK_ACCEPTED \
+            and Task.objects.filter(user=instance.user,
+                                    status=Constants.TASK_ACCEPTED).count() == 1:
+            instance.user.ball += instance.problem.ball
+            instance.user.save()
+        logger.debug('(task=%s) Checked in %s', instance.pk, time() - t1)

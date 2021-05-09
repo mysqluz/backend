@@ -1,5 +1,6 @@
 from .db import Database
 from api import models
+from . import logger
 
 
 class Tester:
@@ -12,10 +13,10 @@ class Tester:
         data1 = self.db.select(root_sql)
         try:
             data2 = self.db.select(user_sql)
-            print(data2)
+            logger.debug(data2)
             return data1 == data2
         except Exception as e:
-            print('User Script Error', e)
+            logger.debug('User Script Error %s', e)
             return False
 
     def execute(self, root_sql, user_sql, table_name):
@@ -27,7 +28,7 @@ class Tester:
             data2 = self.db.select(f"SELECT * FROM {table_name}")
             return data1 == data2
         except Exception as e:
-            print('User Script Error', e)
+            logger.debug('User Script Error %s', e)
             return False
 
     def test(self):

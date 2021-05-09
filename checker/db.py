@@ -1,5 +1,7 @@
 from django.db import connections
 
+from . import logger
+
 
 class Database:
     def __init__(self, task):
@@ -12,25 +14,25 @@ class Database:
         with connections['user'].cursor() as cursor:
             cursor.execute('SHOW TABLES')
             tables = cursor.fetchall()
-            print(tables)
+            logger.debug(tables)
             cursor.execute(self.problem.dump)
             cursor.execute('SHOW TABLES')
             tables = cursor.fetchall()
-            print(tables)
+            logger.debug(tables)
 
     def down_db(self):
         with connections['user'].cursor() as cursor:
             cursor.execute('SHOW TABLES')
             tables = cursor.fetchall()
-            print(tables)
+            logger.debug(tables)
             cursor.execute('SET FOREIGN_KEY_CHECKS=0')
             for table in tables:
-                print(f'DROP TABLE `{table[0]}`')
+                logger.debug(f'DROP TABLE `{table[0]}`')
                 cursor.execute(f'DROP TABLE `{table[0]}`')
             cursor.execute('SET FOREIGN_KEY_CHECKS=1')
             cursor.execute('SHOW TABLES')
             tables = cursor.fetchall()
-            print(tables)
+            logger.debug(tables)
 
     def select(self, sql: str):
         with connections['user'].cursor() as cursor:

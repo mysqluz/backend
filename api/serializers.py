@@ -5,17 +5,17 @@ from drf_extra_fields.fields import Base64ImageField
 from rest_framework import serializers
 from rest_framework.authtoken.models import Token
 
-from api.models import User, Category, Problem, News, Task
+from api.models import User, Category, Problem, News, Task, Constants
 
 
-class UserSerializer(serializers.HyperlinkedModelSerializer):
+class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ['url', 'username', 'first_name', 'last_name', 'avatar', 'ball']
+        fields = ['username', 'first_name', 'last_name', 'avatar', 'ball']
 
 
 class UserRegistrationSerializer(serializers.ModelSerializer):
-    avatar = Base64ImageField()
+    avatar = Base64ImageField(required=False)
     email = serializers.EmailField(max_length=50)
     password = serializers.CharField(write_only=True)
     confirm_password = serializers.CharField(write_only=True)
@@ -35,7 +35,7 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
 
 
 class UserUpdateSerializer(serializers.ModelSerializer):
-    avatar = Base64ImageField()
+    avatar = Base64ImageField(required=False)
     email = serializers.EmailField(max_length=50)
     password = serializers.CharField(write_only=True, allow_null=True)
     confirm_password = serializers.CharField(write_only=True, allow_null=True)
@@ -104,10 +104,23 @@ class ProblemSerializer(serializers.ModelSerializer):
 
 class ProblemWithoutCategorySerializer(serializers.ModelSerializer):
     author = UserSerializer()
+    accepted = serializers.SerializerMethodField()
 
     class Meta:
         model = Problem
         exclude = ('dump', 'permissions', 'answer', 'execute_table')
+
+    def get_accepted(self, obj: Problem):
+        task = Task.objects.filter(user=self.context['request'].user,
+                                   problem=obj,
+                                   status=Constants.TASK_ACCEPTED).first()
+        return bool(task)
+
+
+class TaskProblemSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Problem
+        fields = ('id', 'title')
 
 
 class CategoryProblemsSerializer(serializers.ModelSerializer):
@@ -119,12 +132,22 @@ class CategoryProblemsSerializer(serializers.ModelSerializer):
 
 
 class TaskSerializer(serializers.ModelSerializer):
-    problem = ProblemWithoutCategorySerializer()
+    problem = TaskProblemSerializer()
     user = UserSerializer()
+    status_text = serializers.SerializerMethodField()
 
     class Meta:
         model = Task
         exclude = ('source',)
+
+    def get_field_names(self, declared_fields, info):
+        fields = super(TaskSerializer, self).get_field_names(declared_fields, info)
+        if isinstance(self.instance, Task) and self.instance.user == self.context['request'].user:
+            fields.append('source')
+        return fields
+
+    def get_status_text(self, obj: Task):
+        return Constants.task.get(obj.status)
 
 
 class TaskCreateSerializer(serializers.ModelSerializer):

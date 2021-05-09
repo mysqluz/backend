@@ -39,6 +39,8 @@ INSTALLED_APPS = [
     'rest_framework.authtoken',
     'corsheaders',
     'drf_yasg',
+    'ckeditor',
+    'ckeditor_uploader',
     'api'
 ]
 
@@ -142,6 +144,45 @@ CORS_ALLOWED_ORIGINS = [
     "http://127.0.0.1:8080",
     "http://127.0.0.1:9000"
 ]
+
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'formatters': {
+        'verbose': {
+            'format': '[{asctime}] {message}',
+            'datefmt': '%d.%m.%Y %H:%M:%S',
+            'style': '{',
+        },
+    },
+    'handlers': {
+        'console': {
+            'level': 'DEBUG',
+            'class': 'logging.StreamHandler',
+            'formatter': 'verbose'
+        },
+        'file': {
+            'level': 'DEBUG',
+            'class': 'logging.FileHandler',
+            'filename': 'debug.log',
+            'formatter': 'verbose'
+        },
+    },
+    'loggers': {
+        'checker': {
+            'handlers': ['console', 'file'],
+            'propagate': False,
+            'level': 'DEBUG',
+        },
+    },
+}
+
+STATIC_ROOT = BASE_DIR / 'static'
+MEDIA_ROOT = BASE_DIR / 'media'
+MEDIA_URL = '/media/'
+CKEDITOR_IMAGE_BACKEND = "pillow"
+CKEDITOR_UPLOAD_PATH = 'uploads/'
+CKEDITOR_BASEPATH = "/static/ckeditor/ckeditor/"
 
 try:
     with open(Path.joinpath(Path(__file__).resolve().parent, 'local_settings.py')) as f:
