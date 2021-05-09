@@ -158,9 +158,14 @@ class TaskSerializer(serializers.ModelSerializer):
 
 
 class TaskCreateSerializer(serializers.ModelSerializer):
+    status_text = serializers.SerializerMethodField()
+
     class Meta:
         model = Task
         exclude = ('user',)
+
+    def get_status_text(self, obj: Task):
+        return Constants.task.get(obj.status)
 
 
 class TaskWithoutUserSerializer(serializers.ModelSerializer):
