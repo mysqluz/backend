@@ -13,7 +13,7 @@ from api.serializers import (
     ProblemSerializer, NewsSerializer,
     CategoryProblemsSerializer, TaskSerializer,
     UserTasksSerializer, ProblemTasksSerializer,
-    TaskCreateSerializer
+    TaskCreateSerializer, ProblemListSerializer
 )
 
 
@@ -114,6 +114,11 @@ class ProblemViewSet(viewsets.ModelViewSet):
     permission_classes = (CategoryProblemNewsPermission,)
 
     http_method_names = ['get']
+
+    def get_serializer_class(self):
+        if self.action == 'list':
+            return ProblemListSerializer
+        return ProblemSerializer
 
 
 class CategoryProblemsViewSet(viewsets.ModelViewSet):

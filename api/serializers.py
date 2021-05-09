@@ -93,6 +93,12 @@ class CategorySerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
+class ProblemListSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Problem
+        exclude = ('dump', 'permissions', 'answer', 'execute_table')
+
+
 class ProblemSerializer(serializers.ModelSerializer):
     category = CategorySerializer()
     author = UserSerializer()
@@ -111,7 +117,7 @@ class ProblemWithoutCategorySerializer(serializers.ModelSerializer):
         exclude = ('dump', 'permissions', 'answer', 'execute_table')
 
     def get_accepted(self, obj: Problem):
-        task = Task.objects.filter(user=self.context['request'].user,
+        task = Task.objects.filter(user_id=self.context['request'].user.pk,
                                    problem=obj,
                                    status=Constants.TASK_ACCEPTED).first()
         return bool(task)
@@ -157,19 +163,27 @@ class TaskCreateSerializer(serializers.ModelSerializer):
 
 
 class TaskWithoutUserSerializer(serializers.ModelSerializer):
-    problem = ProblemWithoutCategorySerializer()
+    problem = TaskProblemSerializer()
+    status_text = serializers.SerializerMethodField()
 
     class Meta:
         model = Task
-        exclude = ('source',)
+        exclude = ('source', 'user')
+
+    def get_status_text(self, obj: Task):
+        return Constants.task.get(obj.status)
 
 
 class TaskWithoutProblemSerializer(serializers.ModelSerializer):
     user = UserSerializer()
+    status_text = serializers.SerializerMethodField()
 
     class Meta:
         model = Task
-        exclude = ('source',)
+        exclude = ('source', 'problem')
+
+    def get_status_text(self, obj: Task):
+        return Constants.task.get(obj.status)
 
 
 class UserTasksSerializer(serializers.ModelSerializer):
@@ -177,7 +191,7 @@ class UserTasksSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = ['url', 'username', 'first_name', 'last_name', 'avatar', 'ball', 'tasks']
+        fields = ['username', 'first_name', 'last_name', 'avatar', 'ball', 'tasks']
 
 
 class ProblemTasksSerializer(serializers.ModelSerializer):
