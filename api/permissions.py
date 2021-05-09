@@ -19,6 +19,20 @@ class UserPermission(permissions.BasePermission):
         return False
 
 
+class UserMePermission(permissions.BasePermission):
+    def has_permission(self, request, view):
+        print(1)
+        if request.user.is_authenticated:
+            return True
+        return False
+
+    def has_object_permission(self, request, view, obj):
+        print(2)
+        if request.user.is_authenticated:
+            return True
+        return False
+
+
 class UserUpdatePermission(permissions.BasePermission):
     def has_permission(self, request, view):
         if request.user.is_authenticated:

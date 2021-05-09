@@ -118,6 +118,17 @@ REST_FRAMEWORK = {
     'PAGE_SIZE': 12
 }
 
+SWAGGER_SETTINGS = {
+   'SECURITY_DEFINITIONS': {
+      'Token': {
+            'type': 'apiKey',
+            'name': 'Authorization',
+            'in': 'header',
+            'description': 'Example format: Token {key}'
+      }
+   }
+}
+
 # Internationalization
 # https://docs.djangoproject.com/en/3.1/topics/i18n/
 

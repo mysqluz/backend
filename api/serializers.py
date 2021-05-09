@@ -95,18 +95,32 @@ class CategorySerializer(serializers.ModelSerializer):
 
 
 class ProblemListSerializer(serializers.ModelSerializer):
+    accepted = serializers.SerializerMethodField()
+
     class Meta:
         model = Problem
         exclude = ('dump', 'permissions', 'answer', 'execute_table')
 
+    def get_accepted(self, obj: Problem):
+        task = Task.objects.filter(user_id=self.context['request'].user.pk,
+                                   problem=obj,
+                                   status=Constants.TASK_ACCEPTED).first()
+        return bool(task)
 
 class ProblemSerializer(serializers.ModelSerializer):
     category = CategorySerializer()
     author = UserSerializer()
+    accepted = serializers.SerializerMethodField()
 
     class Meta:
         model = Problem
         exclude = ('dump', 'permissions', 'answer', 'execute_table')
+
+    def get_accepted(self, obj: Problem):
+        task = Task.objects.filter(user_id=self.context['request'].user.pk,
+                                   problem=obj,
+                                   status=Constants.TASK_ACCEPTED).first()
+        return bool(task)
 
 
 class ProblemWithoutCategorySerializer(serializers.ModelSerializer):

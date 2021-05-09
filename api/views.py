@@ -1,11 +1,12 @@
 from rest_framework import status, viewsets
 from rest_framework.authtoken.models import Token
-from rest_framework.generics import CreateAPIView, GenericAPIView, UpdateAPIView
+from rest_framework.generics import CreateAPIView, GenericAPIView, UpdateAPIView, RetrieveAPIView
 from rest_framework.generics import RetrieveDestroyAPIView
 from rest_framework.response import Response
 
 from api.models import Category, User, Problem, News, Task, Constants
-from api.permissions import UserPermission, UserUpdatePermission, CategoryProblemNewsPermission, TaskPermission
+from api.permissions import UserPermission, UserUpdatePermission, CategoryProblemNewsPermission, TaskPermission, \
+    UserMePermission
 from api.serializers import (
     UserRegistrationSerializer, UserLoginSerializer,
     TokenSerializer, CategorySerializer,
@@ -23,6 +24,17 @@ class UserViewSet(viewsets.ModelViewSet):
     serializer_class = UserSerializer
     permission_classes = (UserPermission,)
     http_method_names = ['get', 'head', 'options']
+
+
+# ViewSets define the view behavior.
+class UserMeViewSet(RetrieveAPIView):
+
+    serializer_class = UserSerializer
+    permission_classes = (UserMePermission,)
+    http_method_names = ['get']
+
+    def get_object(self):
+        return User.objects.filter(pk=self.request.user.pk).first()
 
 
 class UserRegistrationAPIView(CreateAPIView):
