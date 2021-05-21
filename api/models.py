@@ -11,9 +11,6 @@ from django.utils.text import slugify
 from checker import tester, logger
 
 
-def problem_dump_directory(problem, filename):
-    return f"static/dumps/{filename}"
-
 
 class Constants:
     PERMISSION_SELECT = 0
@@ -34,9 +31,12 @@ class Constants:
 
 
 class User(AbstractUser):
-    avatar = models.ImageField(null=True, blank=True, upload_to='media/uploads/avatar')
+    first_name = None
+    last_name = None
+    fullname = models.CharField(max_length=100)
+    avatar = models.ImageField(null=True, blank=True, upload_to='avatar')
     ball = models.IntegerField(default=0)
-    REQUIRED_FIELDS = ['email', 'first_name', 'last_name']
+    REQUIRED_FIELDS = ['email', 'fullname']
 
     class Meta:
         ordering = ('-ball',)
@@ -87,8 +87,8 @@ class Problem(models.Model):
 
 
 class Task(models.Model):
-    problem = models.ForeignKey(Problem, on_delete=models.DO_NOTHING, related_name='tasks')
-    user = models.ForeignKey(User, on_delete=models.DO_NOTHING, related_name='tasks')
+    problem = models.ForeignKey(Problem, on_delete=models.PROTECT, related_name='tasks')
+    user = models.ForeignKey(User, on_delete=models.PROTECT, related_name='tasks')
     status = models.IntegerField(choices=(zip(Constants.task.keys(), Constants.task.values())),
                                  default=Constants.TASK_IN_QUEUE)
     source = models.TextField()

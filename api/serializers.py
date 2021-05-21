@@ -11,7 +11,7 @@ from api.models import User, Category, Problem, News, Task, Constants
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ['username', 'first_name', 'last_name', 'avatar', 'ball']
+        fields = ['username', 'fullname', 'avatar', 'ball']
 
 
 class UserRegistrationSerializer(serializers.ModelSerializer):
@@ -19,12 +19,12 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
     email = serializers.EmailField(max_length=50)
     password = serializers.CharField(write_only=True)
     confirm_password = serializers.CharField(write_only=True)
-    first_name = serializers.CharField(max_length=50)
-    last_name = serializers.CharField(max_length=50)
+    fullname = serializers.CharField(max_length=100)
+    ball = serializers.IntegerField(read_only=True)
 
     class Meta:
         model = User
-        fields = ("id", "username", "email", "first_name", "last_name", "avatar", "password", "confirm_password")
+        fields = ("id", "username", "email", "fullname", "avatar", "ball", "password", "confirm_password")
 
     def validate(self, attrs):
         if attrs.get('password') != attrs.get('confirm_password'):
@@ -39,12 +39,11 @@ class UserUpdateSerializer(serializers.ModelSerializer):
     email = serializers.EmailField(max_length=50)
     password = serializers.CharField(write_only=True, allow_null=True)
     confirm_password = serializers.CharField(write_only=True, allow_null=True)
-    first_name = serializers.CharField(max_length=50)
-    last_name = serializers.CharField(max_length=50)
+    fullname = serializers.CharField(max_length=100)
 
     class Meta:
         model = User
-        fields = ("id", "username", "email", "first_name", "last_name", "avatar", "password", "confirm_password")
+        fields = ("id", "username", "email", "fullname", "avatar", "password", "confirm_password")
 
     def validate(self, attrs):
         if attrs.get('password') != attrs.get('confirm_password'):
@@ -106,6 +105,7 @@ class ProblemListSerializer(serializers.ModelSerializer):
                                    problem=obj,
                                    status=Constants.TASK_ACCEPTED).first()
         return bool(task)
+
 
 class ProblemSerializer(serializers.ModelSerializer):
     category = CategorySerializer()
@@ -211,7 +211,7 @@ class UserTasksSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = ['username', 'first_name', 'last_name', 'avatar', 'ball', 'tasks']
+        fields = ['username', 'fullname', 'avatar', 'ball', 'tasks']
 
 
 class ProblemTasksSerializer(serializers.ModelSerializer):
