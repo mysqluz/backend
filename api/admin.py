@@ -21,7 +21,7 @@ class UserAdminCustom(UserAdmin):
         }),
     )
     list_display = ('username', 'email', 'fullname', 'is_staff', 'ball')
-    search_fields = ('username', 'full_name', 'email')
+    search_fields = ('username', 'fullname', 'email')
     ordering = ('-ball',)
 
 
