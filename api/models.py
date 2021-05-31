@@ -92,6 +92,9 @@ class Task(models.Model):
     status = models.IntegerField(choices=(zip(Constants.task.keys(), Constants.task.values())),
                                  default=Constants.TASK_IN_QUEUE)
     source = models.TextField()
+    
+    class Meta:
+        ordering = ('-id',)
 
     def __str__(self):
         return f"{self.problem} - {self.user}"
