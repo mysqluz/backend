@@ -11,7 +11,7 @@ from api.models import User, Category, Problem, News, Task, Constants
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ['username', 'fullname', 'avatar', 'ball']
+        fields = ['id', 'username', 'fullname', 'avatar', 'ball']
 
 
 class UserRegistrationSerializer(serializers.ModelSerializer):
