@@ -82,6 +82,13 @@ DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
         'NAME': BASE_DIR / 'db.sqlite3',
+    },
+    'user': {
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': 'mysql_uz',
+        'USER': 'user',
+        'PASSWORD': 'user_pwd',
+        'HOST': 'mysqluz_db'
     }
 }
 
@@ -119,14 +126,14 @@ REST_FRAMEWORK = {
 }
 
 SWAGGER_SETTINGS = {
-   'SECURITY_DEFINITIONS': {
-      'Token': {
+    'SECURITY_DEFINITIONS': {
+        'Token': {
             'type': 'apiKey',
             'name': 'Authorization',
             'in': 'header',
             'description': 'Example format: Token {key}'
-      }
-   }
+        }
+    }
 }
 
 # Internationalization

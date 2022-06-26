@@ -1,3 +1,4 @@
+from django.conf import settings
 from django.db import connections
 
 from . import logger
@@ -37,12 +38,18 @@ class Database:
     def select(self, sql: str):
         with connections['user'].cursor() as cursor:
             cursor.execute(sql)
-            columns = [col[0] for col in cursor.description]
-            return [
-                dict(zip(columns, row))
-                for row in cursor.fetchall()
-            ]
+            try:
+                columns = [col[0] for col in cursor.description]
+                return [
+                    dict(zip(columns, row))
+                    for row in cursor.fetchall()
+                ]
+            except:
+                db_name = settings.DATABASES['user']['NAME']
+                cursor.execute('CREATE DATABASE IF NOT EXISTS %s' % db_name)
 
     def execute(self, sql: str):
         with connections['user'].cursor() as cursor:
             cursor.execute(sql)
+            db_name = settings.DATABASES['user']['NAME']
+            cursor.execute('CREATE DATABASE IF NOT EXISTS %s' % db_name)
